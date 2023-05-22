@@ -16,7 +16,7 @@ Unofficial reverse engineered API for Google's MusicLM on the AI Test Kitchen
 1. Install Python 3 from the official website: https://www.python.org/downloads/
 2. Run the following command in your terminal to install the required libraries: 
 ```sh
-pip install selenium undetected_chromedriver python-dotenv requests
+pip install selenium undetected-chromedriver python-dotenv requests
 ```
 
 ## Usage

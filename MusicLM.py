@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from undetected_chromedriver import Chrome
+import undetected_chromedriver as uc
 import requests
 from time import sleep
 import os 
@@ -13,14 +13,17 @@ import base64
 
 class Music:
 
+    
     dotenv_file = dotenv.find_dotenv()
     dotenv.load_dotenv(dotenv_file)
     musiclm_url = "https://content-aisandbox-pa.googleapis.com/v1:soundDemo?alt=json"
     url = 'https://aitestkitchen.withgoogle.com/experiments/music-lm'
 
     def __init__(self):
+        self.CHROME_EXE_PATH = None
         self.email = os.environ["EMAIL"]
         self.password = os.environ["PASSWORD"]
+        self.browser_executable_path = self.get_chrome_exe_path()
         if os.environ["TOKEN"] == "":
             self.token = self.get_token()
         elif self.token_refresh():
@@ -75,13 +78,12 @@ class Music:
         print("Tracks successfully generated!")
     
     def get_token(self):
-
-        chrome_options = Options()
+        chrome_options = uc.ChromeOptions()
         chrome_options.add_argument("--headless")
-        driver = Chrome(options = chrome_options, use_subprocess=True) 
+        driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.broser_executable_path) 
         wait = WebDriverWait(driver, 20)
 
-        driver.get('https://aitestkitchen.withgoogle.com/experiments/music-lm')
+        driver.get(self.url)
 
         wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'ktZYzZ')]"))).click()
 
@@ -125,3 +127,23 @@ class Music:
             return True
         else:
             return False
+        
+    def get_chrome_exe_path(self):
+        if self.CHROME_EXE_PATH is not None:
+            return self.CHROME_EXE_PATH
+        # linux pyinstaller bundle
+        chrome_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chrome', "chrome")
+        if os.path.exists(chrome_path):
+            if not os.access(chrome_path, os.X_OK):
+                raise Exception(f'Chrome binary "{chrome_path}" is not executable. '
+                                f'Please, extract the archive with "tar xzf <file.tar.gz>".')
+            CHROME_EXE_PATH = chrome_path
+            return CHROME_EXE_PATH
+        # windows pyinstaller bundle
+        chrome_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chrome', "chrome.exe")
+        if os.path.exists(chrome_path):
+            CHROME_EXE_PATH = chrome_path
+            return CHROME_EXE_PATH
+        # system
+        CHROME_EXE_PATH = uc.find_chrome_executable()
+        return CHROME_EXE_PATH
