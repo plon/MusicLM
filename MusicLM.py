@@ -80,7 +80,7 @@ class Music:
     def get_token(self):
         chrome_options = uc.ChromeOptions()
         chrome_options.add_argument("--headless")
-        driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.browser_executable_path) 
+        driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.browser_executable_path, version_main=113) 
         wait = WebDriverWait(driver, 20)
 
         driver.get(self.url)
