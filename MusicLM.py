@@ -116,7 +116,9 @@ class Music:
         token = token_cookie[start_idx:end_idx]
 
         dotenv.set_key(self.dotenv_file, "TOKEN", str(token))
+        os.environ["TOKEN"] = str(token)
         dotenv.set_key(self.dotenv_file, "EXPIRATION_TIMESTAMP", str(datetime.datetime.now() + datetime.timedelta(minutes=59)))
+        os.environ["EXPIRATION_TIMESTAMP"] = str(datetime.datetime.now() + datetime.timedelta(minutes=59))
 
         print('OAuth 2.0 token obtained')
         return token
@@ -126,7 +128,7 @@ class Music:
         expiration_timestamp = datetime.datetime.strptime(os.environ['EXPIRATION_TIMESTAMP'],  '%Y-%m-%d %H:%M:%S.%f')
 
         difference = current_timestamp - expiration_timestamp
-        if difference >= datetime.timedelta(minutes=59):
+        if difference >= datetime.timedelta(minutes=0):
             return True
         else:
             return False
