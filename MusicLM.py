@@ -81,19 +81,18 @@ class Music:
         chrome_options = uc.ChromeOptions()
         chrome_options.add_argument("--headless")
         driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.browser_executable_path, version_main=113) 
-        wait = WebDriverWait(driver, 20)
 
         driver.get(self.url)
 
-        wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'ktZYzZ')]"))).click()
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'ktZYzZ')]"))).click()
 
-        wait.until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'lgEhqE')]"))).click()
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'lgEhqE')]"))).click()
 
         driver.switch_to.window(driver.window_handles[1])
         
         print('Logging in...')
-        wait.until(EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(f'{self.email}\n')
-        wait.until(EC.visibility_of_element_located((By.NAME, 'Passwd'))).send_keys(f'{self.password}\n')
+        WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(f'{self.email}\n')
+        WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'Passwd'))).send_keys(f'{self.password}\n')
         print('Successfully logged in')
 
         driver.switch_to.window(driver.window_handles[0])
@@ -101,6 +100,7 @@ class Music:
         sleep(5)
         print('Getting OAuth 2.0 token')
         cookies = driver.get_cookies()
+        driver.quit()
         for cookie in cookies:
             if cookie['name'] == 'TOKEN':
                 token_cookie = cookie['value']

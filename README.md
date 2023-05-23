@@ -48,3 +48,9 @@ The `Music` class uses the `requests` library to make a POST request to an API w
 ## Disclaimer
 
 This tool is for educational purposes only and should not be used for any commercial or illegal activities. The author is not responsible for any misuse of this tool.
+
+## Errors
+
+
+ ```OsError: [WinError 6] The handle is invalid```  - refer to this issue: https://github.com/ultrafunkamsterdam/undetected-chromedriver/pull/1256
+
