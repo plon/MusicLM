@@ -33,17 +33,22 @@ from MusicLM import Music
 ```python
 music = Music()
 ```
-7. Call the `get_music` method on the instance and provide a string input and an integer `generationCount` argument (8 max).
+7. Call the `get_tracks` method on the instance and provide a string input and an integer `generationCount` argument (8 max).
 ```python
-music.get_music("Ambient, soft sounding music I can study to", 2)
+input = "Ambient, soft sounding music I can study to"
+tracks = music.get_tracks(input, 2)
 ```
-8. The generated tracks will be saved to a new directory with the same name as the input string.
+8. Call the `base64toMP3` method on the instance and provide the returned tracks from the `get_tracks` method and a filename.
+```python
+music.base64toMP3(tracks, input)
+```
+9. The generated tracks will be saved to a new directory with the same name as the input string.
 
 ## How it works
 
 The `Music` class handles authentication using a headless Chrome browser that obtains the OAuth 2.0 authentication token. The `get_token` method logs the user in to the AI Test Kitchen website and retrieves the OAuth 2.0 token from the browser's cookies. The token is saved to a `.env` file. The token expires every hour and is refreshed automatically using the `token_refresh` method.
 
-The `Music` class uses the `requests` library to make a POST request to an API with the input string and the number of tracks to generate. The API returns a JSON object containing the base64-encoded audio data for each track. The base64-encoded audio data is decoded and each track is saved as an MP3 file. 
+The `Music` class uses the `requests` library to make a POST request to an API with the input string and the number of tracks to generate. The API returns a JSON object containing the base64-encoded audio data for each track. The base64-encoded audio data is decoded with the `base64toMP3` method and each track is saved as an MP3 file. 
 
 ## Disclaimer
 
