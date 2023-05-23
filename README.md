@@ -4,8 +4,8 @@ Unofficial reverse engineered API for Google's MusicLM on the AI Test Kitchen
 
 ## Dependencies
 
-- Google Chrome
-- Python 3.6
+- Google Chrome >= 113
+- Python >= 3.6
 - Selenium
 - undetected_chromedriver
 - python-dotenv
