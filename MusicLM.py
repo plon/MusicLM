@@ -1,21 +1,17 @@
+import requests, os, dotenv, datetime, json, base64, logging; from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import undetected_chromedriver as uc
-import requests
-from time import sleep
-import os 
-import dotenv
-import datetime
-import json
-import base64
+
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
+
+dotenv_file = dotenv.find_dotenv()
+dotenv.load_dotenv(dotenv_file)
 
 class Music:
-
-    
-    dotenv_file = dotenv.find_dotenv()
-    dotenv.load_dotenv(dotenv_file)
     musiclm_url = "https://content-aisandbox-pa.googleapis.com/v1:soundDemo?alt=json"
     url = 'https://aitestkitchen.withgoogle.com/experiments/music-lm'
 
@@ -53,8 +49,8 @@ class Music:
 
         response = requests.request("POST", self.musiclm_url, headers=headers, data=payload)
         if response.status_code == 400:
-            print("Oops, can't generate audio for that.")
-            return
+            logging.info("Oops, can't generate audio for that.")
+            return "Oops, can't generate audio for that."
         
         tracks = []
         for sound in response.json()['sounds']:
@@ -78,7 +74,8 @@ class Music:
             with open(f"{filename}/track{i+1}.mp3", "wb") as f:
                 f.write(base64.b64decode(track))
 
-        print("Tracks successfully generated!")
+        logging.info("Tracks successfully generated!")
+        return "Tracks successfully generated!"
 
     def get_token(self):
         chrome_options = uc.ChromeOptions()
@@ -93,15 +90,15 @@ class Music:
 
         driver.switch_to.window(driver.window_handles[1])
         
-        print('Logging in...')
+        logging.info('Logging in...')
         WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(f'{self.email}\n')
         WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'Passwd'))).send_keys(f'{self.password}\n')
-        print('Successfully logged in')
+        logging.info('Successfully logged in')
 
         driver.switch_to.window(driver.window_handles[0])
     
         sleep(5)
-        print('Getting OAuth 2.0 token')
+        logging.info('Getting OAuth 2.0 token')
         cookies = driver.get_cookies()
         driver.quit()
         for cookie in cookies:
@@ -115,12 +112,12 @@ class Music:
         end_idx = token_cookie.index(end_sub, start_idx)
         token = token_cookie[start_idx:end_idx]
 
-        dotenv.set_key(self.dotenv_file, "TOKEN", str(token))
+        dotenv.set_key(dotenv_file, "TOKEN", str(token))
         os.environ["TOKEN"] = str(token)
-        dotenv.set_key(self.dotenv_file, "EXPIRATION_TIMESTAMP", str(datetime.datetime.now() + datetime.timedelta(minutes=59)))
+        dotenv.set_key(dotenv_file, "EXPIRATION_TIMESTAMP", str(datetime.datetime.now() + datetime.timedelta(minutes=59)))
         os.environ["EXPIRATION_TIMESTAMP"] = str(datetime.datetime.now() + datetime.timedelta(minutes=59))
 
-        print('OAuth 2.0 token obtained')
+        logging.info('OAuth 2.0 token obtained')
         return token
 
     def token_refresh(self):
