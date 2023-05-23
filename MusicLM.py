@@ -31,7 +31,7 @@ class Music:
         else:
             self.token = os.environ["TOKEN"]
 
-    def get_music(self, input, generationCount):
+    def get_tracks(self, input, generationCount):
         if type(generationCount) != int:
             generationCount = 2
         if generationCount > 8:
@@ -60,23 +60,26 @@ class Music:
         for sound in response.json()['sounds']:
             tracks.append(sound["data"])
 
-        if os.path.exists(input):
+        return tracks
+
+    def base64toMP3(self, tracks_list, filename):
+        if os.path.exists(filename):
             count = 1
 
-            while os.path.exists(input + " (" + str(count) + ")"):
+            while os.path.exists(filename + " (" + str(count) + ")"):
                 count += 1
 
-            os.mkdir(input + " (" + str(count) + ")")
-            input = input + " (" + str(count) + ")"
+            os.mkdir(filename + " (" + str(count) + ")")
+            filename = filename + " (" + str(count) + ")"
         else:
-            os.mkdir(input)
+            os.mkdir(filename)
 
-        for i, track in enumerate(tracks):
-            with open(f"{input}/track{i+1}.mp3", "wb") as f:
+        for i, track in enumerate(tracks_list):
+            with open(f"{filename}/track{i+1}.mp3", "wb") as f:
                 f.write(base64.b64decode(track))
 
         print("Tracks successfully generated!")
-    
+
     def get_token(self):
         chrome_options = uc.ChromeOptions()
         chrome_options.add_argument("--headless")
