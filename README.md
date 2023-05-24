@@ -55,10 +55,9 @@ The `Music` class uses the `requests` library to make a POST request to an API w
 Normally if you input popular media references, it returns an error inferring that it can't generate it (presumably due to copyright issues)
 
 But simply enclosing the references `<>` bypasses it for some reason and works as expected, like here the output music is an unmistakable combination of Attack on Titan's OST's time signature & instruments and the dramatic undertone of Dark Souls OST.
-``` 
-<Attack on Titan> music with a fusion of <Dark Souls> music
-```
-https://github.com/armintum/MusicLM/assets/115377622/44c97fe1-85df-4926-8717-4471a083fd64
+
+https://github.com/armintum/MusicLM/assets/115377622/8f50ee22-d8cb-4370-93ee-343e2aa66db3
+
 
 This bypass was discovered and shared by [ArpanTripathi](https://twitter.com/ArpanTripathi20) on Twitter
 
