@@ -60,7 +60,7 @@ But simply enclosing the references `<>` bypasses it for some reason and works a
 ```
 https://github.com/armintum/MusicLM/assets/115377622/44c97fe1-85df-4926-8717-4471a083fd64
 
-This bypass is credited to a tweet from [ArpanTripathi](https://twitter.com/ArpanTripathi20)
+This bypass was discovered and shared by [ArpanTripathi](https://twitter.com/ArpanTripathi20) on Twitter
 
  https://twitter.com/ArpanTripathi20/status/1661292475892285441
 
