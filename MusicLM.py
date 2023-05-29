@@ -1,12 +1,17 @@
-import requests, os, dotenv, datetime, json, base64, logging; from time import sleep
+import requests 
+import os 
+import dotenv
+import datetime 
+import json 
+import base64 
+import logging 
+from time import sleep
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import undetected_chromedriver as uc
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 dotenv_file = dotenv.find_dotenv()
 dotenv.load_dotenv(dotenv_file)
@@ -28,12 +33,9 @@ class Music:
             self.token = os.environ["TOKEN"]
 
     def get_tracks(self, input, generationCount):
-        if type(generationCount) != int:
+        if not isinstance(generationCount, int):
             generationCount = 2
-        if generationCount > 8:
-            generationCount = 8
-        if generationCount < 1:
-            generationCount = 1
+        generationCount = min(8, max(1, generationCount))
 
         payload = json.dumps({
         "generationCount": generationCount,
@@ -47,10 +49,14 @@ class Music:
         'Authorization': f'Bearer {self.token}'
         }
 
-        response = requests.request("POST", self.musiclm_url, headers=headers, data=payload)
+        try:
+            response = requests.post(self.musiclm_url, headers=headers, data=payload)
+        except requests.exceptions.ConnectionError:
+            logging.error("Can't connect to the server.")
+            return "Can't connect to the server."
         if response.status_code == 400:
-            logging.info("Oops, can't generate audio for that.")
-            return "Oops, can't generate audio for that."
+                logging.error("Oops, can't generate audio for that.")
+                return "Oops, can't generate audio for that."
         
         tracks = []
         for sound in response.json()['sounds']:
@@ -59,19 +65,16 @@ class Music:
         return tracks
 
     def base64toMP3(self, tracks_list, filename):
-        if os.path.exists(filename):
-            count = 1
+        count = 0
+        new_filename = filename
+        while os.path.exists(new_filename):
+            count += 1
+            new_filename = f'{filename} ({count})'
 
-            while os.path.exists(filename + " (" + str(count) + ")"):
-                count += 1
-
-            os.mkdir(filename + " (" + str(count) + ")")
-            filename = filename + " (" + str(count) + ")"
-        else:
-            os.mkdir(filename)
+        os.mkdir(new_filename)
 
         for i, track in enumerate(tracks_list):
-            with open(f"{filename}/track{i+1}.mp3", "wb") as f:
+            with open(f"{new_filename}/track{i+1}.mp3", "wb") as f:
                 f.write(base64.b64decode(track))
 
         logging.info("Tracks successfully generated!")
@@ -82,30 +85,43 @@ class Music:
         chrome_options.add_argument("--headless")
         driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.browser_executable_path, version_main=113) 
 
-        driver.get(self.url)
+        try:
+            driver.get(self.url)
 
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'ktZYzZ')]"))).click()
+            try:
+                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'ktZYzZ')]"))).click()
 
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'lgEhqE')]"))).click()
+                WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//button[contains(@class, 'lgEhqE')]"))).click()
 
-        driver.switch_to.window(driver.window_handles[1])
-        
-        logging.info('Logging in...')
-        WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(f'{self.email}\n')
-        WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'Passwd'))).send_keys(f'{self.password}\n')
-        logging.info('Successfully logged in')
+                driver.switch_to.window(driver.window_handles[1])
 
-        driver.switch_to.window(driver.window_handles[0])
-    
-        sleep(5)
-        logging.info('Getting OAuth 2.0 token')
-        cookies = driver.get_cookies()
-        driver.quit()
-        for cookie in cookies:
-            if cookie['name'] == 'TOKEN':
-                token_cookie = cookie['value']
-                break
-        
+                logging.info('Logging in...')
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'identifier'))).send_keys(f'{self.email}\n')
+                WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'Passwd'))).send_keys(f'{self.password}\n')
+                logging.info('Successfully logged in')
+
+                driver.switch_to.window(driver.window_handles[0])
+
+            except Exception as e:
+                logging.ERROR("An error occurred while interacting with the webpage, details: " + str(e))
+                raise Exception("Unable to fetch token due to Selenium interaction error")
+
+            sleep(5)
+            logging.info('Getting OAuth 2.0 token')
+            cookies = driver.get_cookies()
+
+        except Exception as e:
+            logging.ERROR("An error occurred while fetching the token, details: " + str(e))
+            raise Exception("Unable to fetch token due to browser error")
+
+        finally:
+            driver.quit()
+
+        token_cookie = next((cookie['value'] for cookie in cookies if cookie['name'] == 'TOKEN'), None)
+
+        if token_cookie is None:
+            raise Exception("Unable to obtain token")
+
         start_sub = "ya29"
         end_sub = "%22"
         start_idx = token_cookie.index(start_sub)
