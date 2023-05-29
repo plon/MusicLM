@@ -1,6 +1,6 @@
 # MusicLM
 
-Unofficial reverse engineered API for Google's MusicLM on the AI Test Kitchen
+Unofficial API for Google's MusicLM on the AI Test Kitchen
 
 ## Dependencies
 
