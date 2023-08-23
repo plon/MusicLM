@@ -1,4 +1,4 @@
-requests
-undetected-chromedriver
-selenium
-python-dotenv
+requests==2.31.0
+undetected-chromedriver==3.5.2
+selenium==4.11.2
+python-dotenv==1.0.0
