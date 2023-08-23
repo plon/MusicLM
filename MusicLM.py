@@ -9,7 +9,7 @@ from time import sleep
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import undetected_chromedriver as uc
+from seleniumbase import Driver
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,10 +21,8 @@ class Music:
     url = 'https://aitestkitchen.withgoogle.com/experiments/music-lm'
 
     def __init__(self):
-        self.CHROME_EXE_PATH = None
         self.email = os.environ["EMAIL"]
         self.password = os.environ["PASSWORD"]
-        self.browser_executable_path = self.get_chrome_exe_path()
         if os.environ["TOKEN"] == "":
             self.token = self.get_token()
         elif self.token_refresh():
@@ -53,10 +51,12 @@ class Music:
             response = requests.post(self.musiclm_url, headers=headers, data=payload)
         except requests.exceptions.ConnectionError:
             logging.error("Can't connect to the server.")
-            return "Can't connect to the server."
+            # Bad Gateway
+            return 502
         if response.status_code == 400:
                 logging.error("Oops, can't generate audio for that.")
-                return "Oops, can't generate audio for that."
+                # Bad Request
+                return 400
         
         tracks = []
         for sound in response.json()['sounds']:
@@ -64,7 +64,7 @@ class Music:
 
         return tracks
 
-    def base64toMP3(self, tracks_list, filename):
+    def b64toMP3(self, tracks_list, filename):
         count = 0
         new_filename = filename
         while os.path.exists(new_filename):
@@ -78,12 +78,12 @@ class Music:
                 f.write(base64.b64decode(track))
 
         logging.info("Tracks successfully generated!")
-        return "Tracks successfully generated!"
+        # Successful Request
+        return 200
 
     def get_token(self):
-        chrome_options = uc.ChromeOptions()
-        chrome_options.add_argument("--headless")
-        driver = uc.Chrome(options = chrome_options, use_subprocess=True, browser_executable_path=self.browser_executable_path, version_main=113) 
+
+        driver = Driver(uc=True, headless=True) 
 
         try:
             driver.get(self.url)
@@ -145,23 +145,3 @@ class Music:
             return True
         else:
             return False
-        
-    def get_chrome_exe_path(self):
-        if self.CHROME_EXE_PATH is not None:
-            return self.CHROME_EXE_PATH
-        # linux pyinstaller bundle
-        chrome_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chrome', "chrome")
-        if os.path.exists(chrome_path):
-            if not os.access(chrome_path, os.X_OK):
-                raise Exception(f'Chrome binary "{chrome_path}" is not executable. '
-                                f'Please, extract the archive with "tar xzf <file.tar.gz>".')
-            CHROME_EXE_PATH = chrome_path
-            return CHROME_EXE_PATH
-        # windows pyinstaller bundle
-        chrome_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'chrome', "chrome.exe")
-        if os.path.exists(chrome_path):
-            CHROME_EXE_PATH = chrome_path
-            return CHROME_EXE_PATH
-        # system
-        CHROME_EXE_PATH = uc.find_chrome_executable()
-        return CHROME_EXE_PATH
