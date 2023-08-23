@@ -1,4 +1,4 @@
 requests==2.31.0
-undetected-chromedriver==3.5.2
 selenium==4.11.2
+seleniumbase==4.17.9
 python-dotenv==1.0.0
