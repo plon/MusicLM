@@ -6,5 +6,5 @@ music = Music()
 input = "Ambient, soft sounding music I can study to"
 tracks = music.get_tracks(input, 2)
 
-if not isinstance(tracks, list):
+if isinstance(tracks, list):
     music.b64toMP3(tracks, input)
