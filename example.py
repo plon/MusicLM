@@ -5,5 +5,6 @@ music = Music()
 
 input = "Ambient, soft sounding music I can study to"
 tracks = music.get_tracks(input, 2)
-if not (tracks == "Oops, can't generate audio for that." or tracks == "Can't connect to the server."):
+
+if not isinstance(tracks, list):
     music.base64toMP3(tracks, input)
