@@ -1,4 +1,4 @@
-### Working 08/23/23
+### Working 09/06/23
 
 # MusicLM
 
@@ -6,7 +6,7 @@ Unofficial API for Google's MusicLM on the AI Test Kitchen
 
 ## Dependencies
 
-- Google Chrome >= 113
+- Google Chrome
 - Python >= 3.6
 - Selenium
 - undetected_chromedriver
